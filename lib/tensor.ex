@@ -1,5 +1,15 @@
 defmodule Tensor do
+  @moduledoc """
+  Module for working with n-dimensional tensors.
+  """
+
+  @enforce_keys [:dims, :data]
   defstruct dims: [], data: []
+
+  @type t :: %Tensor{
+          dims: [integer],
+          data: [number]
+        }
 
   @doc """
   Checks if the given value is a tensor.
@@ -14,11 +24,12 @@ defmodule Tensor do
   @doc """
   Creates a new tensor of zeros.
   """
-  @spec zeros(dims :: [integer]) :: %Tensor{}
+  @spec zeros(dims :: [integer]) :: t
   def zeros(dims) when is_list(dims) do
     new(dims, gen_zeros(dims))
   end
 
+  # Generates a nested list of zeros.
   defp gen_zeros([n]) when is_integer(n) and n > 0 do
     List.duplicate(0, n)
   end
@@ -36,7 +47,7 @@ defmodule Tensor do
     %Tensor{dims: [2, 3], data: [[1, 2, 3], [4, 5, 6]]}
 
   """
-  @spec new(data :: [number]) :: %Tensor{}
+  @spec new(data :: [number]) :: t
   def new(data) when is_list(data) do
     dims = infer_dims(data)
     %Tensor{dims: dims, data: data}
@@ -57,7 +68,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [2, 3, 4]}
 
   """
-  @spec add(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
+  @spec add(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
   def add(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -76,7 +87,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [0, 1, 2]}
 
   """
-  @spec sub(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
+  @spec sub(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
   def sub(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -96,7 +107,7 @@ defmodule Tensor do
 
   """
 
-  @spec mul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
+  @spec mul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
   def mul(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -115,7 +126,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [2, 2, 2]}
 
   """
-  @spec div(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
+  @spec div(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
   def div(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -134,17 +145,17 @@ defmodule Tensor do
     %Tensor{dims: [2, 2], data: [[58.0, 64.0], [139.0, 154.0]]}
 
   """
-  @spec matmul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
+  @spec matmul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
   def matmul(t1, t2) when is_tensor(t1, t2) do
     valid_for_matmul?(t1, t2)
 
-    {rows1, cols1} = {Enum.at(t1.dims, 0), Enum.at(t1.dims, 1)}
-    {_rows2, cols2} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
+    {t1_rows, t1_cols} = {Enum.at(t1.dims, 0), Enum.at(t1.dims, 1)}
+    {_t2_rows, t2_cols} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
 
     data =
-      for i <- 0..(rows1 - 1) do
-        for j <- 0..(cols2 - 1) do
-          Enum.reduce(0..(cols1 - 1), 0, fn k, acc ->
+      for i <- 0..(t1_rows - 1) do
+        for j <- 0..(t2_cols - 1) do
+          Enum.reduce(0..(t1_cols - 1), 0, fn k, acc ->
             acc + Enum.at(Enum.at(t1.data, i), k) * Enum.at(Enum.at(t2.data, k), j)
           end)
         end
