@@ -33,7 +33,7 @@ defmodule Ml.Tensor do
   """
   @spec new(data :: [number]) :: %Tensor{}
   def new(data) when is_list(data) do
-    {dims, _} = infer_dims(data, [])
+    dims = infer_dims(data)
     %Tensor{dims: dims, data: data}
   end
 
@@ -145,17 +145,11 @@ defmodule Ml.Tensor do
   end
 
   # Infer the dimensions of a nested list.
-  defp infer_dims([], dims) do
-    {dims, []}
-  end
-
-  defp infer_dims([head | tail], dims) when is_list(head) do
-    {new_dims, remaining} = infer_dims(head, dims)
-    infer_dims(tail, [length(new_dims) | new_dims] ++ remaining)
-  end
-
-  defp infer_dims([_ | tail], dims) do
-    infer_dims(tail, [1 | dims])
+  @spec infer_dims(data :: [[number]]) :: [integer]
+  defp infer_dims(data) do
+    rows = length(data)
+    cols = length(Enum.at(data, 0))
+    [rows, cols]
   end
 
   # Checks if two tensors have the same dimensions.
