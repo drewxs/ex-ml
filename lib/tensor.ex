@@ -1,6 +1,4 @@
 defmodule Tensor do
-  alias Tensor
-
   defstruct dims: [], data: []
 
   @doc """
@@ -18,8 +16,15 @@ defmodule Tensor do
   """
   @spec zeros(dims :: [integer]) :: %Tensor{}
   def zeros(dims) when is_list(dims) do
-    data = for _ <- 1..Enum.reduce(dims, 1, &(&1 * &2)), do: 0.0
-    new(data)
+    new(dims, gen_zeros(dims))
+  end
+
+  defp gen_zeros([n]) when is_integer(n) and n > 0 do
+    List.duplicate(0, n)
+  end
+
+  defp gen_zeros([head | tail]) when is_integer(head) and head > 0 do
+    List.duplicate(gen_zeros(tail), head)
   end
 
   @doc """
@@ -34,6 +39,10 @@ defmodule Tensor do
   @spec new(data :: [number]) :: %Tensor{}
   def new(data) when is_list(data) do
     dims = infer_dims(data)
+    %Tensor{dims: dims, data: data}
+  end
+
+  def new(dims, data) when is_list(data) do
     %Tensor{dims: dims, data: data}
   end
 
