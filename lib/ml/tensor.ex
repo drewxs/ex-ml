@@ -92,6 +92,35 @@ defmodule Ml.Tensor do
     new_dims = t1.dims
     new_data = Enum.zip(t1.data, t2.data) |> Enum.map(fn {a, b} -> a / b end)
     new(new_dims, new_data)
+
+  @doc """
+  Matrix multiplies two tensors.
+
+  ## Examples
+
+    iex> t1 = Ml.Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
+    iex> t2 = Ml.Tensor.new([3, 2], [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])
+    iex> Ml.Tensor.matmul(t1, t2)
+    %Ml.Tensor{dims: [2, 2], data: [[58.0, 64.0], [139.0, 154.0]]}
+
+  """
+  @spec matmul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
+  def matmul(t1, t2) when is_tensor(t1, t2) do
+    valid_for_matmul?(t1, t2)
+
+    {rows1, cols1} = {Enum.at(t1.dims, 0), Enum.at(t1.dims, 1)}
+    {_rows2, cols2} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
+
+    data =
+      for i <- 0..(rows1 - 1) do
+        for j <- 0..(cols2 - 1) do
+          Enum.reduce(0..(cols1 - 1), 0, fn k, acc ->
+            acc + Enum.at(Enum.at(t1.data, i), k) * Enum.at(Enum.at(t2.data, k), j)
+          end)
+        end
+      end
+
+    new(data)
   end
 
   # Infer the dimensions of a nested list.
@@ -108,9 +137,21 @@ defmodule Ml.Tensor do
     infer_dimensions(tail, [1 | dims])
   end
 
+  # Checks if two tensors have the same dimensions.
   defp same_dims?(a, b) do
     if a.dims != b.dims do
       raise ArgumentError, message: "Tensors must have the same dimensions"
+    end
+  end
+
+  # Checks if two tensors are compatible for matrix multiplication.
+  defp valid_for_matmul?(a, b) do
+    if length(a.dims) != 2 or length(b.dims) != 2 do
+      raise ArgumentError, message: "Tensors must be 2-dimensional"
+    end
+
+    if Enum.at(a.dims, 1) != Enum.at(b.dims, 0) do
+      raise ArgumentError, message: "Tensors must be compatible for matrix multiplication"
     end
   end
 end
