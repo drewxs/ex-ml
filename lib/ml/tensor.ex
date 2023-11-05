@@ -94,6 +94,20 @@ defmodule Ml.Tensor do
     new(new_dims, new_data)
   end
 
+  # Infer the dimensions of a nested list.
+  defp infer_dimensions([], dims) do
+    {dims, []}
+  end
+
+  defp infer_dimensions([head | tail], dims) when is_list(head) do
+    {new_dims, remaining} = infer_dimensions(head, dims)
+    infer_dimensions(tail, [length(new_dims) | new_dims] ++ remaining)
+  end
+
+  defp infer_dimensions([_ | tail], dims) do
+    infer_dimensions(tail, [1 | dims])
+  end
+
   defp same_dims?(a, b) do
     if a.dims != b.dims do
       raise ArgumentError, message: "Tensors must have the same dimensions"
