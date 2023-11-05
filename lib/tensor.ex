@@ -1,5 +1,5 @@
-defmodule Ml.Tensor do
-  alias Ml.Tensor
+defmodule Tensor do
+  alias Tensor
 
   defstruct dims: [], data: []
 
@@ -27,8 +27,8 @@ defmodule Ml.Tensor do
 
   ## Examples
 
-    iex> Ml.Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
-    %Ml.Tensor{dims: [2, 3], data: [[1, 2, 3], [4, 5, 6]]}
+    iex> Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
+    %Tensor{dims: [2, 3], data: [[1, 2, 3], [4, 5, 6]]}
 
   """
   @spec new(data :: [number]) :: %Tensor{}
@@ -42,10 +42,10 @@ defmodule Ml.Tensor do
 
   ## Examples
 
-    iex> t1 = Ml.Tensor.new([1, 3], [[1, 2, 3]])
-    iex> t2 = Ml.Tensor.new([1, 3], [[1, 1, 1]])
-    iex> Ml.Tensor.add(t1, t2)
-    %Ml.Tensor{dims: [1, 3], data: [2, 3, 4]}
+    iex> t1 = Tensor.new([1, 3], [[1, 2, 3]])
+    iex> t2 = Tensor.new([1, 3], [[1, 1, 1]])
+    iex> Tensor.add(t1, t2)
+    %Tensor{dims: [1, 3], data: [2, 3, 4]}
 
   """
   @spec add(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
@@ -61,10 +61,10 @@ defmodule Ml.Tensor do
 
   ## Examples
 
-    iex> t1 = Ml.Tensor.new([1, 3], [[1, 2, 3]])
-    iex> t2 = Ml.Tensor.new([1, 3], [[1, 1, 1]])
-    iex> Ml.Tensor.sub(t1, t2)
-    %Ml.Tensor{dims: [1, 3], data: [0, 1, 2]}
+    iex> t1 = Tensor.new([1, 3], [[1, 2, 3]])
+    iex> t2 = Tensor.new([1, 3], [[1, 1, 1]])
+    iex> Tensor.sub(t1, t2)
+    %Tensor{dims: [1, 3], data: [0, 1, 2]}
 
   """
   @spec sub(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
@@ -80,10 +80,10 @@ defmodule Ml.Tensor do
 
   ## Examples
 
-    iex> t1 = Ml.Tensor.new([1, 3], [[1, 2, 3]])
-    iex> t2 = Ml.Tensor.new([1, 3], [[2, 3, 4]])
-    iex> Ml.Tensor.mul(t1, t2)
-    %Ml.Tensor{dims: [1, 3], data: [2, 6, 12]}
+    iex> t1 = Tensor.new([1, 3], [[1, 2, 3]])
+    iex> t2 = Tensor.new([1, 3], [[2, 3, 4]])
+    iex> Tensor.mul(t1, t2)
+    %Tensor{dims: [1, 3], data: [2, 6, 12]}
 
   """
 
@@ -100,10 +100,10 @@ defmodule Ml.Tensor do
 
   ## Examples
 
-    iex> t1 = Ml.Tensor.new([1, 3], [[4, 6, 8]])
-    iex> t2 = Ml.Tensor.new([1, 3], [[2, 3, 4]])
-    iex> Ml.Tensor.div(t1, t2)
-    %Ml.Tensor{dims: [1, 3], data: [2, 2, 2]}
+    iex> t1 = Tensor.new([1, 3], [[4, 6, 8]])
+    iex> t2 = Tensor.new([1, 3], [[2, 3, 4]])
+    iex> Tensor.div(t1, t2)
+    %Tensor{dims: [1, 3], data: [2, 2, 2]}
 
   """
   @spec div(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
@@ -119,10 +119,10 @@ defmodule Ml.Tensor do
 
   ## Examples
 
-    iex> t1 = Ml.Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
-    iex> t2 = Ml.Tensor.new([3, 2], [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])
-    iex> Ml.Tensor.matmul(t1, t2)
-    %Ml.Tensor{dims: [2, 2], data: [[58.0, 64.0], [139.0, 154.0]]}
+    iex> t1 = Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
+    iex> t2 = Tensor.new([3, 2], [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])
+    iex> Tensor.matmul(t1, t2)
+    %Tensor{dims: [2, 2], data: [[58.0, 64.0], [139.0, 154.0]]}
 
   """
   @spec matmul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: %Tensor{}
