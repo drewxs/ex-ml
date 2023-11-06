@@ -27,16 +27,24 @@ defmodule Tensor do
   """
   @spec zeros(dims :: [integer]) :: t
   def zeros(dims) when is_list(dims) do
-    new(dims, gen_zeros(dims))
+    new(dims, gen_matrix(dims, 0))
+  end
+
+  @doc """
+  Creates a new tensor of ones.
+  """
+  @spec ones(dims :: [integer]) :: t
+  def ones(dims) when is_list(dims) do
+    new(dims, gen_matrix(dims, 1))
   end
 
   # Generates a nested list of zeros.
-  defp gen_zeros([n]) when is_integer(n) and n > 0 do
-    List.duplicate(0, n)
+  defp gen_matrix([n], v) when is_integer(n) and n > 0 do
+    List.duplicate(v, n)
   end
 
-  defp gen_zeros([head | tail]) when is_integer(head) and head > 0 do
-    List.duplicate(gen_zeros(tail), head)
+  defp gen_matrix([head | tail], v) when is_integer(head) and head > 0 do
+    List.duplicate(gen_matrix(tail, v), head)
   end
 
   @doc """
