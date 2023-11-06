@@ -6,6 +6,7 @@ defmodule Tensor do
   @enforce_keys [:dims, :data]
   defstruct dims: [], data: []
 
+  @typedoc "An n-dimensional matrix of numbers."
   @type t :: %Tensor{
           dims: [integer],
           data: [number]
@@ -68,7 +69,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [2, 3, 4]}
 
   """
-  @spec add(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
+  @spec add(t1 :: t, t2 :: t) :: t
   def add(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -87,7 +88,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [0, 1, 2]}
 
   """
-  @spec sub(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
+  @spec sub(t1 :: t, t2 :: t) :: t
   def sub(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -107,7 +108,7 @@ defmodule Tensor do
 
   """
 
-  @spec mul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
+  @spec mul(t1 :: t, t2 :: t) :: t
   def mul(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -126,7 +127,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [2, 2, 2]}
 
   """
-  @spec div(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
+  @spec div(t1 :: t, t2 :: t) :: t
   def div(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -145,7 +146,7 @@ defmodule Tensor do
     %Tensor{dims: [2, 2], data: [[58.0, 64.0], [139.0, 154.0]]}
 
   """
-  @spec matmul(t1 :: %Tensor{}, t2 :: %Tensor{}) :: t
+  @spec matmul(t1 :: t, t2 :: t) :: t
   def matmul(t1, t2) when is_tensor(t1, t2) do
     valid_for_matmul?(t1, t2)
 
