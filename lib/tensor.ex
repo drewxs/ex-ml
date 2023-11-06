@@ -80,6 +80,14 @@ defmodule Tensor do
   end
 
   @doc """
+  Returns the size of a tensor.
+  """
+  @spec size(t :: t) :: integer
+  def size(t) when is_tensor(t) do
+    Enum.reduce(t.dims, 1, fn x, acc -> x * acc end)
+  end
+
+  @doc """
   Adds two tensors element-wise.
 
   ## Examples
