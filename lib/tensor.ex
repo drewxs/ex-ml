@@ -38,12 +38,25 @@ defmodule Tensor do
     new(dims, gen_matrix(dims, 1))
   end
 
-  # Generates a nested list of zeros.
-  defp gen_matrix([n], v) when is_integer(n) and n > 0 do
+  @doc """
+  Generates a matrix with the specified dimensions and fills it with the provided value.
+
+  ## Examples
+
+    iex> Tensor.gen_matrix([2, 3], 0.0)
+    [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+    iex> t1 = Tensor.new([[1, 2, 3], [4, 5, 6]])
+    iex> t2 = Tensor.new(Tensor.gen_matrix(t1.dims, 0.0))
+    %Tensor{dims: [2, 3], data: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]}
+
+  """
+  @spec gen_matrix([integer], number) :: [[number]]
+  def gen_matrix([n], v) when is_integer(n) and n > 0 do
     List.duplicate(v, n)
   end
 
-  defp gen_matrix([head | tail], v) when is_integer(head) and head > 0 do
+  @spec gen_matrix([integer | integer], number) :: [[number]]
+  def gen_matrix([head | tail], v) when is_integer(head) and head > 0 do
     List.duplicate(gen_matrix(tail, v), head)
   end
 
