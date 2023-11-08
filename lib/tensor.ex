@@ -9,7 +9,7 @@ defmodule Tensor do
   @typedoc "An n-dimensional matrix of numbers."
   @type t :: %Tensor{
           dims: [integer],
-          data: [number]
+          data: [[number]]
         }
 
   @doc """
@@ -25,7 +25,7 @@ defmodule Tensor do
   @doc """
   Creates a new tensor of zeros.
   """
-  @spec zeros(dims :: [integer]) :: t
+  @spec zeros([integer]) :: t
   def zeros(dims) when is_list(dims) do
     new(dims, gen_matrix(dims, 0))
   end
@@ -33,7 +33,7 @@ defmodule Tensor do
   @doc """
   Creates a new tensor of ones.
   """
-  @spec ones(dims :: [integer]) :: t
+  @spec ones([integer]) :: t
   def ones(dims) when is_list(dims) do
     new(dims, gen_matrix(dims, 1))
   end
@@ -69,7 +69,7 @@ defmodule Tensor do
     %Tensor{dims: [2, 3], data: [[1, 2, 3], [4, 5, 6]]}
 
   """
-  @spec new(data :: [number]) :: t
+  @spec new([number]) :: t
   def new(data) when is_list(data) do
     dims = infer_dims(data)
     %Tensor{dims: dims, data: data}
@@ -98,7 +98,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [2, 3, 4]}
 
   """
-  @spec add(t1 :: t, t2 :: t) :: t
+  @spec add(t, t) :: t
   def add(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -117,7 +117,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [0, 1, 2]}
 
   """
-  @spec sub(t1 :: t, t2 :: t) :: t
+  @spec sub(t, t) :: t
   def sub(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -137,7 +137,7 @@ defmodule Tensor do
 
   """
 
-  @spec mul(t1 :: t, t2 :: t) :: t
+  @spec mul(t, t) :: t
   def mul(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -156,7 +156,7 @@ defmodule Tensor do
     %Tensor{dims: [1, 3], data: [2, 2, 2]}
 
   """
-  @spec div(t1 :: t, t2 :: t) :: t
+  @spec div(t, t) :: t
   def div(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
@@ -175,7 +175,7 @@ defmodule Tensor do
     %Tensor{dims: [2, 2], data: [[58.0, 64.0], [139.0, 154.0]]}
 
   """
-  @spec matmul(t1 :: t, t2 :: t) :: t
+  @spec matmul(t, t) :: t
   def matmul(t1, t2) when is_tensor(t1, t2) do
     valid_for_matmul?(t1, t2)
 
@@ -195,7 +195,7 @@ defmodule Tensor do
   end
 
   # Infer the dimensions of a nested list.
-  @spec infer_dims(data :: [[number]]) :: [integer]
+  @spec infer_dims([[number]]) :: [integer]
   defp infer_dims(data) do
     rows = length(data)
     cols = length(Enum.at(data, 0))
