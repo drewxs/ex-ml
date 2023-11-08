@@ -24,6 +24,12 @@ defmodule Tensor do
 
   @doc """
   Creates a new tensor of zeros.
+
+  ## Examples
+
+    iex> Tensor.zeros([2, 3])
+    %Tensor{dims: [2, 3], data: [[0, 0, 0], [0, 0, 0]]}
+
   """
   @spec zeros([integer]) :: t
   def zeros(dims) when is_list(dims) do
@@ -32,6 +38,12 @@ defmodule Tensor do
 
   @doc """
   Creates a new tensor of ones.
+
+  ## Examples
+
+    iex> Tensor.ones([2, 3])
+    %Tensor{dims: [2, 3], data: [[1, 1, 1], [1, 1, 1]]}
+
   """
   @spec ones([integer]) :: t
   def ones(dims) when is_list(dims) do
@@ -174,7 +186,7 @@ defmodule Tensor do
     valid_for_matmul?(t1, t2)
 
     {t1_rows, t1_cols} = {Enum.at(t1.dims, 0), Enum.at(t1.dims, 1)}
-    {_t2_rows, t2_cols} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
+    {_, t2_cols} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
 
     data =
       for i <- 0..(t1_rows - 1) do
@@ -186,6 +198,38 @@ defmodule Tensor do
       end
 
     new(data)
+  end
+
+  @doc """
+  Matrix multiplication for sparse/dense matrices.
+
+  ## Examples
+
+    iex> t1 = Tensor.new([2, 3], [[1, 2, 0], [0, 0, 1]])
+    iex> t2 = Tensor.new([3, 2], [[1, 0], [0, 1], [0, 0]])
+    iex> Tensor.sparse_matmul(t1, t2)
+    [[1, 2], [0, 0]]
+
+  """
+  def sparse_matmul(t1, t2) when is_tensor(t1, t2) do
+    valid_for_matmul?(t1, t2)
+
+    sparse_t1 = sparse(t1)
+    sparse_t2 = sparse(t2)
+
+    {t1_rows, t1_cols} = {Enum.at(t1.dims, 0), Enum.at(t1.dims, 1)}
+    {_, t2_cols} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
+
+    data =
+      for i <- 0..(t1_rows - 1) do
+        for j <- 0..(t2_cols - 1) do
+          Enum.reduce(0..(t1_cols - 1), 0, fn k, acc ->
+            acc + Map.get(sparse_t1, {i, k}, 0) * Map.get(sparse_t2, {k, j}, 0)
+          end)
+        end
+      end
+
+    data
   end
 
   @doc """
@@ -216,6 +260,31 @@ defmodule Tensor do
   @spec first(t :: t) :: number
   def first(t) when is_tensor(t) do
     Enum.at(Enum.at(t.data, 0), 0)
+  end
+
+  @doc """
+  Returns a map of all non-zero elements in a tensor.
+
+  ## Examples
+
+    iex> t = Tensor.new([2, 3], [[1, 0, 3], [0, 5, 0]])
+    iex> Tensor.sparse(t)
+    %{{0, 0} => 1, {0, 2} => 3, {1, 1} => 5}
+
+  """
+  @spec sparse(t) :: map
+  def sparse(t) when is_tensor(t) do
+    {rows, cols} = {Enum.at(t.dims, 0), Enum.at(t.dims, 1)}
+
+    non_zero_elements =
+      for i <- 0..(rows - 1),
+          j <- 0..(cols - 1),
+          value = Enum.at(Enum.at(t.data, i), j),
+          value != 0 do
+        {{i, j}, value}
+      end
+
+    Map.new(non_zero_elements)
   end
 
   # Infer the dimensions of a nested list.
