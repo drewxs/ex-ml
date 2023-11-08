@@ -4,7 +4,7 @@ defmodule Tensor do
   """
 
   @enforce_keys [:dims, :data]
-  defstruct dims: [], data: []
+  defstruct dims: [1, 1], data: [[0.0]]
 
   @typedoc "An n-dimensional matrix of numbers."
   @type t :: %Tensor{
@@ -67,6 +67,8 @@ defmodule Tensor do
 
     iex> Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
     %Tensor{dims: [2, 3], data: [[1, 2, 3], [4, 5, 6]]}
+    iex> Tensor.new(Initializer.identity(2))
+    %Tensor{dims: [2, 2], data: [[1, 0], [0, 1]]}
 
   """
   @spec new([number]) :: t
