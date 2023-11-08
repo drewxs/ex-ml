@@ -82,14 +82,6 @@ defmodule Tensor do
   end
 
   @doc """
-  Returns the size of a tensor.
-  """
-  @spec size(t :: t) :: integer
-  def size(t) when is_tensor(t) do
-    Enum.reduce(t.dims, 1, fn x, acc -> x * acc end)
-  end
-
-  @doc """
   Adds two tensors element-wise.
 
   ## Examples
@@ -194,6 +186,36 @@ defmodule Tensor do
       end
 
     new(data)
+  end
+
+  @doc """
+  Returns the size of a tensor.
+
+  ## Examples
+
+      iex> t = Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
+      iex> Tensor.size(t)
+      6
+
+  """
+  @spec size(t :: t) :: integer
+  def size(t) when is_tensor(t) do
+    Enum.reduce(t.dims, 1, fn x, acc -> x * acc end)
+  end
+
+  @doc """
+  Returns the first element of a tensor.
+
+  ## Examples
+
+      iex> t = Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
+      iex> Tensor.first(t)
+      1
+
+  """
+  @spec first(t :: t) :: number
+  def first(t) when is_tensor(t) do
+    Enum.at(Enum.at(t.data, 0), 0)
   end
 
   # Infer the dimensions of a nested list.
