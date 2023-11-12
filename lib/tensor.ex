@@ -28,12 +28,12 @@ defmodule Tensor do
   ## Examples
 
     iex> Tensor.zeros([2, 3])
-    %Tensor{dims: [2, 3], data: [[0, 0, 0], [0, 0, 0]]}
+    %Tensor{dims: [2, 3], data: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]}
 
   """
   @spec zeros([integer]) :: t
   def zeros(dims) when is_list(dims) do
-    new(dims, gen_matrix(dims, 0))
+    new(dims, gen_matrix(dims, 0.0))
   end
 
   @doc """
@@ -42,12 +42,12 @@ defmodule Tensor do
   ## Examples
 
     iex> Tensor.ones([2, 3])
-    %Tensor{dims: [2, 3], data: [[1, 1, 1], [1, 1, 1]]}
+    %Tensor{dims: [2, 3], data: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]}
 
   """
   @spec ones([integer]) :: t
   def ones(dims) when is_list(dims) do
-    new(dims, gen_matrix(dims, 1))
+    new(dims, gen_matrix(dims, 1.0))
   end
 
   @doc """
@@ -57,8 +57,8 @@ defmodule Tensor do
 
     iex> Tensor.gen_matrix([2, 3], 0.0)
     [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-    iex> t1 = Tensor.new([[1, 2, 3], [4, 5, 6]])
-    iex> t2 = Tensor.new(Tensor.gen_matrix(t1.dims, 0.0))
+    iex> t1 = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.new(Tensor.gen_matrix(t1.dims, 0.0))
     %Tensor{dims: [2, 3], data: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]}
 
   """
@@ -77,10 +77,10 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
-    %Tensor{dims: [2, 3], data: [[1, 2, 3], [4, 5, 6]]}
+    iex> Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    %Tensor{dims: [2, 3], data: [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]}
     iex> Tensor.new(Initializer.identity(2))
-    %Tensor{dims: [2, 2], data: [[1, 0], [0, 1]]}
+    %Tensor{dims: [2, 2], data: [[1.0, 0.0], [0.0, 1.0]]}
 
   """
   @spec new([number]) :: t
@@ -98,17 +98,25 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> t1 = Tensor.new([1, 3], [[1, 2, 3]])
-    iex> t2 = Tensor.new([1, 3], [[1, 1, 1]])
+    iex> t1 = Tensor.new([[1.0, 2.0, 3.0]])
+    iex> t2 = Tensor.new([[1.0, 1.0, 1.0]])
     iex> Tensor.add(t1, t2)
-    %Tensor{dims: [1, 3], data: [2, 3, 4]}
+    %Tensor{dims: [1, 3], data: [[2.0, 3.0, 4.0]]}
 
   """
   @spec add(t, t) :: t
   def add(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
-    data = Enum.zip(t1.data, t2.data) |> Enum.map(fn {a, b} -> a + b end)
+    {rows, cols} = shape(t1)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t1, i, j) + Tensor.at(t2, i, j)
+        end
+      end
+
     new(data)
   end
 
@@ -117,17 +125,25 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> t1 = Tensor.new([1, 3], [[1, 2, 3]])
-    iex> t2 = Tensor.new([1, 3], [[1, 1, 1]])
+    iex> t1 = Tensor.new([[1.0, 2.0, 3.0]])
+    iex> t2 = Tensor.new([[1.0, 1.0, 1.0]])
     iex> Tensor.sub(t1, t2)
-    %Tensor{dims: [1, 3], data: [0, 1, 2]}
+    %Tensor{dims: [1, 3], data: [[0.0, 1.0, 2.0]]}
 
   """
   @spec sub(t, t) :: t
   def sub(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
-    data = Enum.zip(t1.data, t2.data) |> Enum.map(fn {a, b} -> a - b end)
+    {rows, cols} = shape(t1)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t1, i, j) - Tensor.at(t2, i, j)
+        end
+      end
+
     new(data)
   end
 
@@ -136,10 +152,10 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> t1 = Tensor.new([1, 3], [[1, 2, 3]])
-    iex> t2 = Tensor.new([1, 3], [[2, 3, 4]])
+    iex> t1 = Tensor.new([[1.0, 2.0, 3.0]])
+    iex> t2 = Tensor.new([[2.0, 3.0, 4.0]])
     iex> Tensor.mul(t1, t2)
-    %Tensor{dims: [1, 3], data: [2, 6, 12]}
+    %Tensor{dims: [1, 3], data: [[2.0, 6.0, 12.0]]}
 
   """
 
@@ -147,7 +163,15 @@ defmodule Tensor do
   def mul(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
-    data = Enum.zip(t1.data, t2.data) |> Enum.map(fn {a, b} -> a * b end)
+    {rows, cols} = shape(t1)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t1, i, j) * Tensor.at(t2, i, j)
+        end
+      end
+
     new(data)
   end
 
@@ -156,17 +180,25 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> t1 = Tensor.new([1, 3], [[4, 6, 8]])
-    iex> t2 = Tensor.new([1, 3], [[2, 3, 4]])
+    iex> t1 = Tensor.new([[4.0, 6.0, 8.0]])
+    iex> t2 = Tensor.new([[2.0, 3.0, 4.0]])
     iex> Tensor.div(t1, t2)
-    %Tensor{dims: [1, 3], data: [2, 2, 2]}
+    %Tensor{dims: [1, 3], data: [[2.0, 2.0, 2.0]]}
 
   """
   @spec div(t, t) :: t
   def div(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
 
-    data = Enum.zip(t1.data, t2.data) |> Enum.map(fn {a, b} -> a / b end)
+    {rows, cols} = shape(t1)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t1, i, j) / Tensor.at(t2, i, j)
+        end
+      end
+
     new(data)
   end
 
@@ -175,8 +207,8 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> t1 = Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
-    iex> t2 = Tensor.new([3, 2], [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])
+    iex> t1 = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> t2 = Tensor.new([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])
     iex> Tensor.matmul(t1, t2)
     %Tensor{dims: [2, 2], data: [[58.0, 64.0], [139.0, 154.0]]}
 
@@ -185,14 +217,14 @@ defmodule Tensor do
   def matmul(t1, t2) when is_tensor(t1, t2) do
     valid_for_matmul?(t1, t2)
 
-    {t1_rows, t1_cols} = {Enum.at(t1.dims, 0), Enum.at(t1.dims, 1)}
-    {_, t2_cols} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
+    {t1_rows, t1_cols} = shape(t1)
+    {_, t2_cols} = shape(t2)
 
     data =
       for i <- 0..(t1_rows - 1) do
         for j <- 0..(t2_cols - 1) do
           Enum.reduce(0..(t1_cols - 1), 0, fn k, acc ->
-            acc + Enum.at(Enum.at(t1.data, i), k) * Enum.at(Enum.at(t2.data, k), j)
+            acc + Tensor.at(t1, i, k) * Tensor.at(t2, k, j)
           end)
         end
       end
@@ -205,10 +237,10 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> t1 = Tensor.new([2, 3], [[1, 2, 0], [0, 0, 1]])
-    iex> t2 = Tensor.new([3, 2], [[1, 0], [0, 1], [0, 0]])
+    iex> t1 = Tensor.new([[1.0, 2.0, 0.0], [0.0, 0.0, 1.0]])
+    iex> t2 = Tensor.new([[1.0, 0.0], [0.0, 1.0], [0.0, 0.0]])
     iex> Tensor.sparse_matmul(t1, t2)
-    [[1, 2], [0, 0]]
+    [[1.0, 2.0], [0.0, 0.0]]
 
   """
   def sparse_matmul(t1, t2) when is_tensor(t1, t2) do
@@ -217,8 +249,8 @@ defmodule Tensor do
     sparse_t1 = sparse(t1)
     sparse_t2 = sparse(t2)
 
-    {t1_rows, t1_cols} = {Enum.at(t1.dims, 0), Enum.at(t1.dims, 1)}
-    {_, t2_cols} = {Enum.at(t2.dims, 0), Enum.at(t2.dims, 1)}
+    {t1_rows, t1_cols} = Tensor.shape(t1)
+    {_, t2_cols} = Tensor.shape(t2)
 
     data =
       for i <- 0..(t1_rows - 1) do
@@ -233,18 +265,145 @@ defmodule Tensor do
   end
 
   @doc """
+  Returns the transpose of a tensor.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.transpose(t)
+    %Tensor{dims: [3, 2], data: [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]}
+
+  """
+  @spec transpose(t) :: t
+  def transpose(t) when is_tensor(t) do
+    {rows, cols} = shape(t)
+
+    data =
+      for i <- 0..(cols - 1) do
+        for j <- 0..(rows - 1) do
+          Tensor.at(t, j, i)
+        end
+      end
+
+    new([cols, rows], data)
+  end
+
+  @doc """
+  Returns a new tensor with the given tensor flattened.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.flatten(t)
+    %Tensor{dims: [1, 6], data: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]}
+
+  """
+  @spec flatten(t) :: t
+  def flatten(t) when is_tensor(t) do
+    {rows, cols} = shape(t)
+
+    data = Enum.reduce(t.data, [], fn x, acc -> acc ++ x end)
+
+    new([1, rows * cols], data)
+  end
+
+  @doc """
+  Returns a new tensor with a function applied to each element.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.map(t, fn x -> x * 2 end)
+    %Tensor{dims: [2, 3], data: [[2.0, 4.0, 6.0], [8.0, 10.0, 12.0]]}
+
+  """
+  @spec map(t, (number -> number)) :: t
+  def map(t, f) when is_tensor(t) do
+    {rows, cols} = shape(t)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          f.(Tensor.at(t, i, j))
+        end
+      end
+
+    new(data)
+  end
+
+  @doc """
+  Returns a new tensor with each element raised to the given power.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.pow(t, 3)
+    %Tensor{dims: [2, 3], data: [[1.0, 8.0, 27.0], [64.0, 125.0, 216.0]]}
+
+  """
+  @spec pow(t, number) :: t
+  def pow(t, p) when is_tensor(t) do
+    Tensor.map(t, fn x -> :math.pow(x, p) end)
+  end
+
+  @doc """
+  Returns a new tensor with each element squared.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.square(t)
+    %Tensor{dims: [2, 3], data: [[1.0, 4.0, 9.0], [16.0, 25.0, 36.0]]}
+
+  """
+  @spec square(t) :: t
+  def square(t) when is_tensor(t) do
+    Tensor.pow(t, 2)
+  end
+
+  @doc """
+  Returns a new tensor with the square root of each element.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 4.0, 9.0], [16.0, 25.0, 36.0]])
+    iex> Tensor.sqrt(t)
+    %Tensor{dims: [2, 3], data: [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]}
+
+  """
+  @spec sqrt(t) :: t
+  def sqrt(t) when is_tensor(t) do
+    Tensor.map(t, fn x -> :math.sqrt(x) end)
+  end
+
+  @doc """
   Returns the size of a tensor.
 
   ## Examples
 
-      iex> t = Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
+      iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
       iex> Tensor.size(t)
       6
 
   """
-  @spec size(t :: t) :: integer
+  @spec size(t) :: integer
   def size(t) when is_tensor(t) do
     Enum.reduce(t.dims, 1, fn x, acc -> x * acc end)
+  end
+
+  @doc """
+  Returns the element at the given index.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.at(t, 1, 0)
+    4.0
+
+  """
+  @spec at(t, integer, integer) :: number
+  def at(t, i, j) when is_tensor(t) do
+    Enum.at(Enum.at(t.data, i), j)
   end
 
   @doc """
@@ -252,14 +411,29 @@ defmodule Tensor do
 
   ## Examples
 
-      iex> t = Tensor.new([2, 3], [[1, 2, 3], [4, 5, 6]])
+      iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
       iex> Tensor.first(t)
-      1
+      1.0
 
   """
-  @spec first(t :: t) :: number
+  @spec first(t) :: number
   def first(t) when is_tensor(t) do
     Enum.at(Enum.at(t.data, 0), 0)
+  end
+
+  @doc """
+  Returns the shape of a tensor.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.shape(t)
+    {2, 3}
+
+  """
+  @spec shape(t) :: {integer, integer}
+  def shape(t) when is_tensor(t) do
+    {Enum.at(t.dims, 0), Enum.at(t.dims, 1)}
   end
 
   @doc """
@@ -267,19 +441,19 @@ defmodule Tensor do
 
   ## Examples
 
-    iex> t = Tensor.new([2, 3], [[1, 0, 3], [0, 5, 0]])
+    iex> t = Tensor.new([[1.0, 0.0, 3.0], [0.0, 5.0, 0.0]])
     iex> Tensor.sparse(t)
-    %{{0, 0} => 1, {0, 2} => 3, {1, 1} => 5}
+    %{{0, 0} => 1.0, {0, 2} => 3.0, {1, 1} => 5.0}
 
   """
   @spec sparse(t) :: map
   def sparse(t) when is_tensor(t) do
-    {rows, cols} = {Enum.at(t.dims, 0), Enum.at(t.dims, 1)}
+    {rows, cols} = shape(t)
 
     non_zero_elements =
       for i <- 0..(rows - 1),
           j <- 0..(cols - 1),
-          value = Enum.at(Enum.at(t.data, i), j),
+          value = Tensor.at(t, i, j),
           value != 0 do
         {{i, j}, value}
       end
