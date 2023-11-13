@@ -94,7 +94,7 @@ defmodule Tensor do
   end
 
   @doc """
-  Adds two tensors element-wise.
+  Element-wise add a tensor with another tensor or number.
 
   ## Examples
 
@@ -102,6 +102,8 @@ defmodule Tensor do
     iex> t2 = Tensor.new([[1.0, 1.0, 1.0]])
     iex> Tensor.add(t1, t2)
     %Tensor{dims: [1, 3], data: [[2.0, 3.0, 4.0]]}
+    iex> Tensor.add(t1, 2)
+    %Tensor{dims: [1, 3], data: [[3.0, 4.0, 5.0]]}
 
   """
   @spec add(t, t) :: t
@@ -120,14 +122,30 @@ defmodule Tensor do
     new(data)
   end
 
+  @spec add(t, number) :: t
+  def add(t, x) when is_tensor(t) and is_number(x) do
+    {rows, cols} = shape(t)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t, i, j) + x
+        end
+      end
+
+    new(data)
+  end
+
   @doc """
-  Subtracts two tensors element-wise.
+  Element-wise subtract a tensor with another tensor or number.
 
   ## Examples
 
     iex> t1 = Tensor.new([[1.0, 2.0, 3.0]])
     iex> t2 = Tensor.new([[1.0, 1.0, 1.0]])
     iex> Tensor.sub(t1, t2)
+    %Tensor{dims: [1, 3], data: [[0.0, 1.0, 2.0]]}
+    iex> Tensor.sub(t1, 1)
     %Tensor{dims: [1, 3], data: [[0.0, 1.0, 2.0]]}
 
   """
@@ -147,8 +165,22 @@ defmodule Tensor do
     new(data)
   end
 
+  @spec sub(t, number) :: t
+  def sub(t, x) when is_tensor(t) and is_number(x) do
+    {rows, cols} = shape(t)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t, i, j) - x
+        end
+      end
+
+    new(data)
+  end
+
   @doc """
-  Multiplies two tensors element-wise.
+  Element-wise multiply a tensor with another tensor or number.
 
   ## Examples
 
@@ -156,9 +188,10 @@ defmodule Tensor do
     iex> t2 = Tensor.new([[2.0, 3.0, 4.0]])
     iex> Tensor.mul(t1, t2)
     %Tensor{dims: [1, 3], data: [[2.0, 6.0, 12.0]]}
+    iex> Tensor.mul(t1, 2)
+    %Tensor{dims: [1, 3], data: [[2.0, 4.0, 6.0]]}
 
   """
-
   @spec mul(t, t) :: t
   def mul(t1, t2) when is_tensor(t1, t2) do
     same_dims?(t1, t2)
@@ -175,8 +208,22 @@ defmodule Tensor do
     new(data)
   end
 
+  @spec mul(t, number) :: t
+  def mul(t, x) when is_tensor(t) and is_number(x) do
+    {rows, cols} = shape(t)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t, i, j) * x
+        end
+      end
+
+    new(data)
+  end
+
   @doc """
-  Divides two tensors element-wise.
+  Element-wise divide a tensor with another tensor or number.
 
   ## Examples
 
@@ -184,6 +231,8 @@ defmodule Tensor do
     iex> t2 = Tensor.new([[2.0, 3.0, 4.0]])
     iex> Tensor.div(t1, t2)
     %Tensor{dims: [1, 3], data: [[2.0, 2.0, 2.0]]}
+    iex> Tensor.div(t1, 2)
+    %Tensor{dims: [1, 3], data: [[2.0, 3.0, 4.0]]}
 
   """
   @spec div(t, t) :: t
@@ -196,6 +245,20 @@ defmodule Tensor do
       for i <- 0..(rows - 1) do
         for j <- 0..(cols - 1) do
           Tensor.at(t1, i, j) / Tensor.at(t2, i, j)
+        end
+      end
+
+    new(data)
+  end
+
+  @spec div(t, t) :: t
+  def div(t, x) when is_tensor(t) and is_number(x) do
+    {rows, cols} = shape(t)
+
+    data =
+      for i <- 0..(rows - 1) do
+        for j <- 0..(cols - 1) do
+          Tensor.at(t, i, j) / x
         end
       end
 
