@@ -440,6 +440,21 @@ defmodule Tensor do
   end
 
   @doc """
+  Returns a new tensor with the natural logarithm of each element.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 4.0, 9.0], [16.0, 25.0, 36.0]])
+    iex> Tensor.ln(t)
+    %Tensor{dims: [2, 3], data: [[0.0, 1.3862943611198906, 2.1972245773362196], [2.772588722239781, 3.2188758248682006, 3.58351893845611]]}
+
+  """
+  @spec ln(t) :: t
+  def ln(t) when is_tensor(t) do
+    Tensor.map(t, fn x -> :math.log(x) end)
+  end
+
+  @doc """
   Returns the size of a tensor.
 
   ## Examples
