@@ -106,7 +106,7 @@ defmodule Tensor do
   """
   @spec set_elem(t, non_neg_integer, non_neg_integer, number) :: t
   def set_elem(t, row, col, value) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -121,7 +121,7 @@ defmodule Tensor do
         end)
       end)
 
-    %Tensor{t | data: data}
+    new(data)
   end
 
   @doc """
@@ -139,8 +139,8 @@ defmodule Tensor do
   """
   @spec add(t, t) :: t
   def add(t1, t2) when is_tensor(t1, t2) do
-    valid_2d?(t1, t2)
-    same_dims?(t1, t2)
+    valid_2d(t1, t2)
+    same_dims(t1, t2)
 
     {rows, cols} = shape(t1)
 
@@ -156,7 +156,7 @@ defmodule Tensor do
 
   @spec add(t, number) :: t
   def add(t, x) when is_tensor(t) and is_number(x) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -185,8 +185,8 @@ defmodule Tensor do
   """
   @spec sub(t, t) :: t
   def sub(t1, t2) when is_tensor(t1, t2) do
-    valid_2d?(t1, t2)
-    same_dims?(t1, t2)
+    valid_2d(t1, t2)
+    same_dims(t1, t2)
 
     {rows, cols} = shape(t1)
 
@@ -202,7 +202,7 @@ defmodule Tensor do
 
   @spec sub(t, number) :: t
   def sub(t, x) when is_tensor(t) and is_number(x) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -231,8 +231,8 @@ defmodule Tensor do
   """
   @spec mul(t, t) :: t
   def mul(t1, t2) when is_tensor(t1, t2) do
-    valid_2d?(t1, t2)
-    same_dims?(t1, t2)
+    valid_2d(t1, t2)
+    same_dims(t1, t2)
 
     {rows, cols} = shape(t1)
 
@@ -248,8 +248,7 @@ defmodule Tensor do
 
   @spec mul(t, number) :: t
   def mul(t, x) when is_tensor(t) and is_number(x) do
-    valid_2d?(t)
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -278,8 +277,8 @@ defmodule Tensor do
   """
   @spec div(t, t) :: t
   def div(t1, t2) when is_tensor(t1, t2) do
-    valid_2d?(t1, t2)
-    same_dims?(t1, t2)
+    valid_2d(t1, t2)
+    same_dims(t1, t2)
 
     {rows, cols} = shape(t1)
 
@@ -295,7 +294,7 @@ defmodule Tensor do
 
   @spec div(t, t) :: t
   def div(t, x) when is_tensor(t) and is_number(x) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -322,8 +321,7 @@ defmodule Tensor do
   """
   @spec matmul(t, t) :: t
   def matmul(t1, t2) when is_tensor(t1, t2) do
-    valid_2d?(t1, t2)
-    valid_for_matmul?(t1, t2)
+    valid_for_matmul(t1, t2)
 
     {t1_rows, t1_cols} = shape(t1)
     {_, t2_cols} = shape(t2)
@@ -352,8 +350,7 @@ defmodule Tensor do
 
   """
   def sparse_matmul(t1, t2) when is_tensor(t1, t2) do
-    valid_2d?(t1, t2)
-    valid_for_matmul?(t1, t2)
+    valid_for_matmul(t1, t2)
 
     sparse_t1 = sparse(t1)
     sparse_t2 = sparse(t2)
@@ -385,7 +382,7 @@ defmodule Tensor do
   """
   @spec transpose(t) :: t
   def transpose(t) when is_tensor(t) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -411,7 +408,7 @@ defmodule Tensor do
   """
   @spec flatten(t) :: t
   def flatten(t) when is_tensor(t) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -432,7 +429,7 @@ defmodule Tensor do
   """
   @spec map(t, (number -> number)) :: t
   def map(t, f) when is_tensor(t) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -554,7 +551,7 @@ defmodule Tensor do
   """
   @spec at(t, integer, integer) :: number
   def at(t, i, j) when is_tensor(t) do
-    valid_2d?(t)
+    valid_2d(t)
 
     Enum.at(Enum.at(t.data, i), j)
   end
@@ -571,7 +568,7 @@ defmodule Tensor do
   """
   @spec first(t) :: number
   def first(t) when is_tensor(t) do
-    valid_2d?(t)
+    valid_2d(t)
 
     Enum.at(Enum.at(t.data, 0), 0)
   end
@@ -588,7 +585,7 @@ defmodule Tensor do
   """
   @spec shape(t) :: {integer, integer}
   def shape(t) when is_tensor(t) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {Enum.at(t.dims, 0), Enum.at(t.dims, 1)}
   end
@@ -605,7 +602,7 @@ defmodule Tensor do
   """
   @spec sparse(t) :: map
   def sparse(t) when is_tensor(t) do
-    valid_2d?(t)
+    valid_2d(t)
 
     {rows, cols} = shape(t)
 
@@ -630,32 +627,43 @@ defmodule Tensor do
   end
 
   # Checks if two tensors have the same dimensions.
-  defp same_dims?(t1, t2) do
+  @spec same_dims(t, t) :: nil
+  defp same_dims(t1, t2) do
     if t1.dims != t2.dims do
       raise ArgumentError, message: "Tensors must have the same dimensions"
     end
   end
 
   # Checks if a tensor is 2-dimensional.
-  defp valid_2d?(t) when is_tensor(t) do
+  @spec valid_2d(t) :: nil
+  defp valid_2d(t) when is_tensor(t) do
     if length(t.dims) != 2 do
       raise ArgumentError, message: "Tensor must be 2-dimensional"
     end
   end
 
-  defp valid_2d?(t1, t2) when is_tensor(t1, t2) do
+  @spec valid_2d(t, t) :: nil
+  defp valid_2d(t1, t2) when is_tensor(t1, t2) do
     if length(t1.dims) != 2 and length(t2.dims) != 2 do
       raise ArgumentError, message: "Tensor must be 2-dimensional"
     end
   end
 
-  # Checks if two tensors are compatible for matrix multiplication.
-  defp valid_for_matmul?(a, b) do
-    if length(a.dims) != 2 or length(b.dims) != 2 do
-      raise ArgumentError, message: "Tensors must be 2-dimensional"
-    end
+  @spec valid_square(t) :: nil
+  defp valid_square(t) when is_tensor(t) do
+    {rows, cols} = shape(t)
 
-    if Enum.at(a.dims, 1) != Enum.at(b.dims, 0) do
+    if rows != cols do
+      raise ArgumentError, message: "Tensor must be square"
+    end
+  end
+
+  # Checks if two tensors are compatible for matrix multiplication.
+  @spec valid_for_matmul(t, t) :: nil
+  defp valid_for_matmul(t1, t2) do
+    valid_2d(t1, t2)
+
+    if Enum.at(t1.dims, 1) != Enum.at(t2.dims, 0) do
       raise ArgumentError, message: "Tensors must be compatible for matrix multiplication"
     end
   end
