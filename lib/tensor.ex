@@ -455,6 +455,27 @@ defmodule Tensor do
   end
 
   @doc """
+  Returns a clipped tensor with all elements between the given min and max.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 4.0, 9.0], [16.0, 25.0, 36.0]])
+    iex> Tensor.clip(t, 5.0, 20.0)
+    %Tensor{dims: [2, 3], data: [[5.0, 5.0, 9.0], [16.0, 20.0, 20.0]]}
+
+  """
+  @spec clip(t, number, number) :: t
+  def clip(t, min, max) when is_tensor(t) and is_number(min) and is_number(max) do
+    Tensor.map(t, fn x ->
+      cond do
+        x < min -> min
+        x > max -> max
+        true -> x
+      end
+    end)
+  end
+
+  @doc """
   Returns the size of a tensor.
 
   ## Examples
