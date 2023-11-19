@@ -95,6 +95,36 @@ defmodule Tensor do
   end
 
   @doc """
+  Sets the element at the given index to the given value.
+
+  ## Examples
+
+    iex> t = Tensor.new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    iex> Tensor.set_elem(t, 1, 0, 10.0)
+    %Tensor{dims: [2, 3], data: [[1.0, 2.0, 3.0], [10.0, 5.0, 6.0]]}
+
+  """
+  @spec set_elem(t, non_neg_integer, non_neg_integer, number) :: t
+  def set_elem(t, row, col, value) do
+    valid_2d?(t)
+
+    {rows, cols} = shape(t)
+
+    data =
+      Enum.map(0..(rows - 1), fn i ->
+        Enum.map(0..(cols - 1), fn j ->
+          if i == row and j == col do
+            value
+          else
+            at(t, i, j)
+          end
+        end)
+      end)
+
+    %Tensor{t | data: data}
+  end
+
+  @doc """
   Element-wise add a tensor with another tensor or number.
 
   ## Examples
