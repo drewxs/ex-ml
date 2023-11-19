@@ -89,6 +89,7 @@ defmodule Tensor do
     %Tensor{dims: dims, data: data}
   end
 
+  @spec new([integer], [number]) :: t
   def new(dims, data) when is_list(data) do
     %Tensor{dims: dims, data: data}
   end
@@ -108,6 +109,7 @@ defmodule Tensor do
   """
   @spec add(t, t) :: t
   def add(t1, t2) when is_tensor(t1, t2) do
+    valid_2d?(t1, t2)
     same_dims?(t1, t2)
 
     {rows, cols} = shape(t1)
@@ -124,6 +126,8 @@ defmodule Tensor do
 
   @spec add(t, number) :: t
   def add(t, x) when is_tensor(t) and is_number(x) do
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     data =
@@ -151,6 +155,7 @@ defmodule Tensor do
   """
   @spec sub(t, t) :: t
   def sub(t1, t2) when is_tensor(t1, t2) do
+    valid_2d?(t1, t2)
     same_dims?(t1, t2)
 
     {rows, cols} = shape(t1)
@@ -167,6 +172,8 @@ defmodule Tensor do
 
   @spec sub(t, number) :: t
   def sub(t, x) when is_tensor(t) and is_number(x) do
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     data =
@@ -194,6 +201,7 @@ defmodule Tensor do
   """
   @spec mul(t, t) :: t
   def mul(t1, t2) when is_tensor(t1, t2) do
+    valid_2d?(t1, t2)
     same_dims?(t1, t2)
 
     {rows, cols} = shape(t1)
@@ -210,6 +218,9 @@ defmodule Tensor do
 
   @spec mul(t, number) :: t
   def mul(t, x) when is_tensor(t) and is_number(x) do
+    valid_2d?(t)
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     data =
@@ -237,6 +248,7 @@ defmodule Tensor do
   """
   @spec div(t, t) :: t
   def div(t1, t2) when is_tensor(t1, t2) do
+    valid_2d?(t1, t2)
     same_dims?(t1, t2)
 
     {rows, cols} = shape(t1)
@@ -253,6 +265,8 @@ defmodule Tensor do
 
   @spec div(t, t) :: t
   def div(t, x) when is_tensor(t) and is_number(x) do
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     data =
@@ -278,6 +292,7 @@ defmodule Tensor do
   """
   @spec matmul(t, t) :: t
   def matmul(t1, t2) when is_tensor(t1, t2) do
+    valid_2d?(t1, t2)
     valid_for_matmul?(t1, t2)
 
     {t1_rows, t1_cols} = shape(t1)
@@ -307,6 +322,7 @@ defmodule Tensor do
 
   """
   def sparse_matmul(t1, t2) when is_tensor(t1, t2) do
+    valid_2d?(t1, t2)
     valid_for_matmul?(t1, t2)
 
     sparse_t1 = sparse(t1)
@@ -339,6 +355,8 @@ defmodule Tensor do
   """
   @spec transpose(t) :: t
   def transpose(t) when is_tensor(t) do
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     data =
@@ -363,6 +381,8 @@ defmodule Tensor do
   """
   @spec flatten(t) :: t
   def flatten(t) when is_tensor(t) do
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     data = Enum.reduce(t.data, [], fn x, acc -> acc ++ x end)
@@ -382,6 +402,8 @@ defmodule Tensor do
   """
   @spec map(t, (number -> number)) :: t
   def map(t, f) when is_tensor(t) do
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     data =
@@ -502,6 +524,8 @@ defmodule Tensor do
   """
   @spec at(t, integer, integer) :: number
   def at(t, i, j) when is_tensor(t) do
+    valid_2d?(t)
+
     Enum.at(Enum.at(t.data, i), j)
   end
 
@@ -517,6 +541,8 @@ defmodule Tensor do
   """
   @spec first(t) :: number
   def first(t) when is_tensor(t) do
+    valid_2d?(t)
+
     Enum.at(Enum.at(t.data, 0), 0)
   end
 
@@ -532,6 +558,8 @@ defmodule Tensor do
   """
   @spec shape(t) :: {integer, integer}
   def shape(t) when is_tensor(t) do
+    valid_2d?(t)
+
     {Enum.at(t.dims, 0), Enum.at(t.dims, 1)}
   end
 
@@ -547,6 +575,8 @@ defmodule Tensor do
   """
   @spec sparse(t) :: map
   def sparse(t) when is_tensor(t) do
+    valid_2d?(t)
+
     {rows, cols} = shape(t)
 
     non_zero_elements =
@@ -565,13 +595,27 @@ defmodule Tensor do
   defp infer_dims(data) do
     rows = length(data)
     cols = length(Enum.at(data, 0))
+
     [rows, cols]
   end
 
   # Checks if two tensors have the same dimensions.
-  defp same_dims?(a, b) do
-    if a.dims != b.dims do
+  defp same_dims?(t1, t2) do
+    if t1.dims != t2.dims do
       raise ArgumentError, message: "Tensors must have the same dimensions"
+    end
+  end
+
+  # Checks if a tensor is 2-dimensional.
+  defp valid_2d?(t) when is_tensor(t) do
+    if length(t.dims) != 2 do
+      raise ArgumentError, message: "Tensor must be 2-dimensional"
+    end
+  end
+
+  defp valid_2d?(t1, t2) when is_tensor(t1, t2) do
+    if length(t1.dims) != 2 and length(t2.dims) != 2 do
+      raise ArgumentError, message: "Tensor must be 2-dimensional"
     end
   end
 
