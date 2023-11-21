@@ -1,4 +1,8 @@
 defmodule Loss do
+  @moduledoc """
+  Loss functions used for training neural networks.
+  """
+
   @type t :: Tensor.t()
 
   @doc """

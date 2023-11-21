@@ -1,4 +1,8 @@
 defmodule Activation do
+  @moduledoc """
+  Activation functions and their derivatives.
+  """
+
   @type t :: Tensor.t()
 
   import Tensor, only: [is_tensor: 1]
