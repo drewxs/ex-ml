@@ -10,6 +10,8 @@ defmodule Activation do
   @doc """
   Computes the ReLU activation function on a number or tensor.
 
+  ## Examples
+
     iex> Activation.relu(0.5)
     0.5
     iex> Activation.relu(Tensor.new([[0.0, 1.0], [-1.0, 2.0]]))
@@ -32,6 +34,8 @@ defmodule Activation do
   @doc """
   Computes the derivative of the ReLU activation function on a number or tensor.
 
+  ## Examples
+
     iex> Activation.d_relu(0.5)
     1.0
     iex> Activation.d_relu(Tensor.new([[0.0, 1.0], [-1.0, 2.0]]))
@@ -53,6 +57,8 @@ defmodule Activation do
 
   @doc """
   Computes the Leaky ReLU activation function on a number or tensor.
+  
+  ## Examples
 
     iex> Activation.leaky_relu(0.5)
     0.5
@@ -76,6 +82,8 @@ defmodule Activation do
   @doc """
   Computes the derivative of the Leaky ReLU activation function on a number or tensor.
 
+  ## Examples
+
     iex> Activation.d_leaky_relu(0.5)
     1.0
     iex> Activation.d_leaky_relu(Tensor.new([[0.0, 1.0], [-1.0, 2.0]]))
@@ -98,6 +106,8 @@ defmodule Activation do
   @doc """
   Computes the Sigmoid activation function on a number or tensor.
 
+  ## Examples
+
     iex> Activation.sigmoid(0.0)
     0.5
     iex> Activation.sigmoid(Tensor.new([[0.0, 1.0], [2.0, 3.0]]))
@@ -116,6 +126,8 @@ defmodule Activation do
 
   @doc """
   Computes the derivative of the Sigmoid activation function on a number or tensor.
+
+  ## Examples
 
     iex> Activation.d_sigmoid(0.0)
     0.25
@@ -137,6 +149,8 @@ defmodule Activation do
   @doc """
   Computes the TanH activation function on a number or tensor.
 
+  ## Examples
+
     iex> Activation.tanh(0.5)
     0.46211715726000974
     iex> Activation.tanh(Tensor.new([[0.0, 1.0], [-1.0, 2.0]]))
@@ -155,6 +169,8 @@ defmodule Activation do
 
   @doc """
   Computes the derivative of the TanH activation function on a number or tensor.
+
+  ## Examples
 
     iex> Activation.d_tanh(0.5)
     0.7864477329659274
